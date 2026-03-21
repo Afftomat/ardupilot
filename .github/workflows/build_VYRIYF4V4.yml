@@ -18,11 +18,13 @@ jobs:
           sudo apt-get install -y python3 python3-pip gcc-arm-none-eabi
           pip3 install empy==3.3.4 pexpect
 
-      - name: Build bootloader and firmware
+      - name: Prepare bootloader
+        run: |
+          cp Tools/bootloaders/speedybeef4v4_bl.bin Tools/bootloaders/VYRIYF4V4_bl.bin
+
+      - name: Build firmware
         run: |
           ./waf configure --board VYRIYF4V4
-          ./waf bootloader
-          cp build/VYRIYF4V4/bin/AP_Bootloader.bin Tools/bootloaders/VYRIYF4V4_bl.bin
           ./waf copter
 
       - name: Upload firmware
@@ -32,4 +34,4 @@ jobs:
           path: |
             build/VYRIYF4V4/bin/arducopter.bin
             build/VYRIYF4V4/bin/arducopter.apj
-            Tools/bootloaders/VYRIYF4V4_bl.bin
+
