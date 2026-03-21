@@ -85,9 +85,9 @@ IMU Invensensev3 SPI:icm42688 ROTATION_YAW_90
 define HAL_DEFAULT_INS_FAST_SAMPLE 1
 
 # ---------- Barometer ----------
-# DPS310 on I2C2 (baro_i2c_device = 2, address auto = 0x76 or 0x77)
+# DPS310 on I2C2 (baro_i2c_device = 2, B10/B11)
+# I2C bus index in ArduPilot is 0-based, so I2C2 = index 1
 BARO DPS310 I2C:1:0x76
-BARO DPS310 I2C:1:0x77
 
 # ---------- OSD ----------
 define OSD_ENABLED 1
@@ -100,12 +100,12 @@ define HAL_SDCARD_SPI_BUS 2
 
 # ---------- PWM outputs ----------
 # Motors: B06=M1, B07=M2, B08=M3, B09=M4
-PB6  TIM4CH1 PWM1 BIDIR
-PB7  TIM4CH2 PWM2 BIDIR
-PB8  TIM4CH3 PWM3 BIDIR
-PB9  TIM4CH4 PWM4 BIDIR
+PB6  TIM4CH1 PWM1
+PB7  TIM4CH2 PWM2
+PB8  TIM4CH3 PWM3
+PB9  TIM4CH4 PWM4
 
-# Extra PWM pads (B00, B01, B05)
+# Extra PWM pads
 PB0  TIM3CH3 PWM5
 PB1  TIM3CH4 PWM6
 PB5  TIM3CH2 PWM7
@@ -113,6 +113,9 @@ PB4  TIM3CH1 PWM8
 
 # LED strip / PWM9
 PC9  TIM8CH4 PWM9
+
+# Enable BDShot (bidirectional dshot) via define
+define HAL_WITH_BIDIR_DSHOT 1
 
 # ---------- LEDs ----------
 PC8  OUTPUT LED_BOOTLOADER LOW
@@ -140,9 +143,6 @@ define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
-
-# ---------- DShot / BDShot ----------
-define HAL_WITH_BIDIR_DSHOT 1
 
 # ---------- Defaults ----------
 define HAL_FRAME_TYPE_DEFAULT 1
