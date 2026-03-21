@@ -1,0 +1,35 @@
+name: Build VYRIYF4V4 ArduCopter
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip gcc-arm-none-eabi
+          pip3 install empy==3.3.4 pexpect
+
+      - name: Configure
+        run: |
+          ./waf configure --board VYRIYF4V4
+
+      - name: Build ArduCopter
+        run: |
+          ./waf copter
+
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: VYRIYF4V4-ArduCopter
+          path: |
+            build/VYRIYF4V4/bin/arducopter.bin
+            build/VYRIYF4V4/bin/arducopter.apj
