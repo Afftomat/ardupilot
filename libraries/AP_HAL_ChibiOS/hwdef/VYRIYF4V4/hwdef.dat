@@ -115,7 +115,6 @@ define HAL_OSD_TYPE_DEFAULT 1
 ROMFS_WILDCARD libraries/AP_OSD/fonts/font*.bin
 
 # Barometer - VYRIY uses DPS310 on I2C2 (index 0 = first in I2C_ORDER)
-define AP_BARO_BACKEND_DEFAULT_ENABLED 0
 define AP_BARO_DPS310_ENABLED 1
 BARO DPS310 I2C:0:0x76
 
