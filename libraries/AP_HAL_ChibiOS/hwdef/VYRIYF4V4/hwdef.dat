@@ -1,117 +1,58 @@
-# hw definition file for VYRIY F4 V4 (STM32F405)
-# Based on SpeedyBee F405 V4 hwdef with VYRIY-specific corrections
-# Key differences from SpeedyBee V4:
-#   - IMU rotation: ROTATION_YAW_90 (BF gyro_1_sensor_align=CW90)
-#   - I2C2 on PB10/PB11 (not I2C1 on PB8/PB9)
-#   - Baro: DPS310 on I2C2
-#   - SPI2 MISO/MOSI on PB14/PB15 (not PC2/PC3)
-#   - No SPI3
-MCU STM32F4xx STM32F405xx
-APJ_BOARD_ID AP_HW_SPEEDYBEEF4V4
-OSCILLATOR_HZ 8000000
-FLASH_SIZE_KB 1024
-FLASH_RESERVE_START_KB 48
-define HAL_STORAGE_SIZE 16384
-define STORAGE_FLASH_PAGE 1
-STM32_ST_USE_TIMER 5
-# SPI1 - IMU
-PA5 SPI1_SCK SPI1
-PA6 SPI1_MISO SPI1
-PA7 SPI1_MOSI SPI1
-# SPI2 - OSD + SDCard (VYRIY: PB14/PB15, not PC2/PC3)
-PB13 SPI2_SCK SPI2
-PB14 SPI2_MISO SPI2
-PB15 SPI2_MOSI SPI2
-# Chip select pins
-PA15 SDCARD1_CS CS
-PB12 OSD1_CS CS
-PA4  GYRO1_CS CS
-# Beeper
-PC5 BUZZER OUTPUT GPIO(80) LOW
-define HAL_BUZZER_PIN 80
-# SERIAL ports
-SERIAL_ORDER OTG1 USART1 USART2 USART3 UART4 UART5 USART6
-PA11 OTG_FS_DM OTG1
-PA12 OTG_FS_DP OTG1
-PA9  USART1_TX USART1 NODMA
-PA10 USART1_RX USART1 NODMA
-define DEFAULT_SERIAL1_PROTOCOL SerialProtocol_DJI_FPV
-PA2 USART2_TX USART2
-PA3 USART2_RX USART2
-define DEFAULT_SERIAL2_PROTOCOL SerialProtocol_RCIN
-PC10 USART3_TX USART3 NODMA
-PC11 USART3_RX USART3 NODMA
-define DEFAULT_SERIAL3_PROTOCOL SerialProtocol_None
-PA0 UART4_TX UART4 NODMA
-PA1 UART4_RX UART4 NODMA
-define DEFAULT_SERIAL4_PROTOCOL SerialProtocol_None
-PD2  UART5_RX UART5 NODMA
-PC12 UART5_TX UART5 NODMA
-define DEFAULT_SERIAL5_PROTOCOL SerialProtocol_ESCTelemetry
-define DEFAULT_SERIAL5_BAUD 19200
-PC6 USART6_TX USART6
-PC7 USART6_RX USART6
-define DEFAULT_SERIAL6_PROTOCOL SerialProtocol_GPS
-# I2C - VYRIY uses I2C2 on PB10/PB11
-I2C_ORDER I2C2
-PB10 I2C2_SCL I2C2
-PB11 I2C2_SDA I2C2
-# ADC
-PC0 BATT_VOLTAGE_SENS ADC1 SCALE(1)
-define HAL_BATT_VOLT_PIN 10
-define HAL_BATT_VOLT_SCALE 11.0
-PC1 BATT_CURRENT_SENS ADC1 SCALE(1)
-define HAL_BATT_CURR_PIN 11
-define HAL_BATT_CURR_SCALE 32.0
-PC2 RSSI_ADC ADC1
-define BOARD_RSSI_ANA_PIN 12
-define HAL_BATT_MONITOR_DEFAULT 4
-# MOTORS
-PB6 TIM4_CH1 TIM4 PWM(1) GPIO(50)
-PB7 TIM4_CH2 TIM4 PWM(2) GPIO(51)
-PB8 TIM4_CH3 TIM4 PWM(3) GPIO(52)
-PB9 TIM4_CH4 TIM4 PWM(4) GPIO(53)
-PB0 TIM3_CH3 TIM3 PWM(5) GPIO(54)
-PB1 TIM3_CH4 TIM3 PWM(6) GPIO(55)
-PB5 TIM3_CH2 TIM3 PWM(7) GPIO(56)
-PB4 TIM3_CH1 TIM3 PWM(8) GPIO(57)
-PC9 TIM8_CH4 TIM8 PWM(9) GPIO(58)
-# LEDs
-PC8 LED0 OUTPUT LOW GPIO(90)
-define AP_NOTIFY_GPIO_LED_1_ENABLED 1
-define AP_NOTIFY_GPIO_LED_1_PIN 90
-# OSD
-SPIDEV osd SPI2 DEVID1 OSD1_CS MODE0 10*MHZ 10*MHZ
-define OSD_ENABLED 1
-define HAL_OSD_TYPE_DEFAULT 1
-ROMFS_WILDCARD libraries/AP_OSD/fonts/font*.bin
-# Barometer - VYRIY uses DPS310 on I2C2 (index 0 = first in I2C_ORDER)
-define AP_BARO_DPS310_ENABLED 1
-BARO DPS310 I2C:0:0x76
-# IMU - VYRIY rotation is CW90 = YAW_90
-SPIDEV imu1 SPI1 DEVID1 GYRO1_CS MODE3 1*MHZ 8*MHZ
-IMU Invensensev3 SPI:imu1 ROTATION_YAW_90
-# SDCard on SPI2
-SPIDEV sdcard SPI2 DEVID3 SDCARD1_CS MODE0 400*KHZ 25*MHZ
-# TIM8_UP removed from DMA_NOSHARE to allow PWM9 (S9) servo output
-DMA_NOSHARE TIM4_UP TIM3_UP SPI1*
-DMA_PRIORITY TIM4_UP TIM3_UP TIM8_UP SPI1*
-define ALLOW_ARM_NO_COMPASS
-define AP_COMPASS_PROBING_ENABLED 1
-define HAL_I2C_INTERNAL_MASK 0
-define HAL_COMPASS_AUTO_ROT_DEFAULT 2
-define HAL_DEFAULT_INS_FAST_SAMPLE 3
-define HAL_FRAME_TYPE_DEFAULT 12
-define HAL_OS_FATFS_IO 1
-include ../include/minimize_fpv_osd.inc
-# --- VYRIY custom feature overrides ---
-# Disable OpticalFlow to save flash
-undef AP_OPTICALFLOW_ENABLED
-define AP_OPTICALFLOW_ENABLED 0
-# Enable AP_Mount for servo gimbal tilt
-undef HAL_MOUNT_ENABLED
-define HAL_MOUNT_ENABLED 1
-define DEFAULT_NTF_LED_TYPES 257
+name: Build VYRIYF4V4 ArduCopter
+on:
+  workflow_dispatch:
+jobs:
+  build_VYRIYF4V4:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip gcc-arm-none-eabi
+          pip3 install empy==3.3.4 pexpect
+      - name: Prepare bootloader
+        run: |
+          cp Tools/bootloaders/speedybeef4v4_bl.bin Tools/bootloaders/VYRIYF4V4_bl.bin
+      - name: Build firmware
+        run: |
+          ./waf configure --board VYRIYF4V4
+          ./waf copter
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: VYRIYF4V4-ArduCopter
+          path: |
+            build/VYRIYF4V4/bin/arducopter.bin
+            build/VYRIYF4V4/bin/arducopter.apj
+
+  build_OmnibusF4Pro:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3 python3-pip gcc-arm-none-eabi
+          pip3 install empy==3.3.4 pexpect
+      - name: Build firmware
+        run: |
+          ./waf configure --board omnibusf4pro
+          ./waf copter
+      - name: Upload firmware
+        uses: actions/upload-artifact@v4
+        with:
+          name: OmnibusF4Pro-ArduCopter
+          path: |
+            build/omnibusf4pro/bin/arducopter.bin
+            build/omnibusf4pro/bin/arducopter.apj
+
 
 
 
