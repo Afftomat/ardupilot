@@ -93,7 +93,8 @@ SPIDEV imu1 SPI1 DEVID1 GYRO1_CS MODE3 1*MHZ 8*MHZ
 IMU Invensensev3 SPI:imu1 ROTATION_YAW_90
 # SDCard on SPI2
 SPIDEV sdcard SPI2 DEVID3 SDCARD1_CS MODE0 400*KHZ 25*MHZ
-DMA_NOSHARE TIM4_UP TIM3_UP TIM8_UP SPI1*
+# TIM8_UP removed from DMA_NOSHARE to allow PWM9 (S9) servo output
+DMA_NOSHARE TIM4_UP TIM3_UP SPI1*
 DMA_PRIORITY TIM4_UP TIM3_UP TIM8_UP SPI1*
 define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
@@ -103,17 +104,13 @@ define HAL_DEFAULT_INS_FAST_SAMPLE 3
 define HAL_FRAME_TYPE_DEFAULT 12
 define HAL_OS_FATFS_IO 1
 include ../include/minimize_fpv_osd.inc
-
 # --- VYRIY custom feature overrides ---
-
 # Disable OpticalFlow to save flash
 undef AP_OPTICALFLOW_ENABLED
 define AP_OPTICALFLOW_ENABLED 0
-
 # Enable AP_Mount for servo gimbal tilt
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
-
 define DEFAULT_NTF_LED_TYPES 257
 
 
