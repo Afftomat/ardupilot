@@ -150,3 +150,18 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 define HAL_PARACHUTE_ENABLED 0
 
 include ../include/minimize_fpv_osd.inc
+
+# --- custom feature overrides ---
+
+# Disable OpticalFlow to save flash
+undef AP_OPTICALFLOW_ENABLED
+define AP_OPTICALFLOW_ENABLED 0
+
+# Disable QuadPlane to save flash
+undef HAL_QUADPLANE_ENABLED
+define HAL_QUADPLANE_ENABLED 0
+
+# Enable AP_Mount for servo gimbal tilt
+undef HAL_MOUNT_ENABLED
+define HAL_MOUNT_ENABLED 1
+
