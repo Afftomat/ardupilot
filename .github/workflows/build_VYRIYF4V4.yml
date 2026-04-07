@@ -29,29 +29,3 @@ jobs:
             build/VYRIYF4V4/bin/arducopter.bin
             build/VYRIYF4V4/bin/arducopter.apj
 
-  build_OmnibusF4Pro:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3 python3-pip gcc-arm-none-eabi
-          pip3 install empy==3.3.4 pexpect
-      - name: Build firmware
-        run: |
-          ./waf configure --board omnibusf4pro
-          ./waf copter
-      - name: Upload firmware
-        uses: actions/upload-artifact@v4
-        with:
-          name: OmnibusF4Pro-ArduCopter
-          path: |
-            build/omnibusf4pro/bin/arducopter.bin
-            build/omnibusf4pro/bin/arducopter.apj
-
-
-
