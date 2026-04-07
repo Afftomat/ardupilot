@@ -1,13 +1,6 @@
 # hw definition file for VYRIY F4 V4 (STM32F405)
-# Based on SpeedyBee F405 V4 hwdef with VYRIY-specific corrections
-# Key differences from SpeedyBee V4:
-#   - IMU rotation: ROTATION_YAW_90 (BF gyro_1_sensor_align=CW90)
-#   - I2C2 on PB10/PB11 (not I2C1 on PB8/PB9)
-#   - Baro: DPS310 on I2C2
-#   - SPI2 MISO/MOSI on PB14/PB15 (not PC2/PC3)
-#   - No SPI3
-#   - S9 (PC9) используется для серво тилта (Mount Tilt)
-#   - LED убран (PC8 не используется)
+# Based on SpeedyBee F405 V4
+# S9 (PC9) for Servo Tilt
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_SPEEDYBEEF4V4
@@ -23,7 +16,7 @@ PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
 PA7 SPI1_MOSI SPI1
 
-# SPI2 - OSD + SDCard (VYRIY: PB14/PB15, not PC2/PC3)
+# SPI2 - OSD + SDCard
 PB13 SPI2_SCK SPI2
 PB14 SPI2_MISO SPI2
 PB15 SPI2_MOSI SPI2
@@ -61,7 +54,7 @@ PC6 USART6_TX USART6
 PC7 USART6_RX USART6
 define DEFAULT_SERIAL6_PROTOCOL SerialProtocol_GPS
 
-# I2C - VYRIY uses I2C2 on PB10/PB11
+# I2C - I2C2 on PB10/PB11
 I2C_ORDER I2C2
 PB10 I2C2_SCL I2C2
 PB11 I2C2_SDA I2C2
@@ -77,7 +70,7 @@ PC2 RSSI_ADC ADC1
 define BOARD_RSSI_ANA_PIN 12
 define HAL_BATT_MONITOR_DEFAULT 4
 
-# MOTORS (DShot on TIM3 and TIM4)
+# MOTORS
 PB6 TIM4_CH1 TIM4 PWM(1) GPIO(50)
 PB7 TIM4_CH2 TIM4 PWM(2) GPIO(51)
 PB8 TIM4_CH3 TIM4 PWM(3) GPIO(52)
@@ -87,8 +80,7 @@ PB1 TIM3_CH4 TIM3 PWM(6) GPIO(55)
 PB5 TIM3_CH2 TIM3 PWM(7) GPIO(56)
 PB4 TIM3_CH1 TIM3 PWM(8) GPIO(57)
 
-# S9 - серво тилт (Mount Tilt) на TIM8 (отдельный таймер, не используется DShot)
-# В Mission Planner: SERVO9_FUNCTION = 7 (Mount Tilt)
+# S9 - Servo Tilt on PC9 (TIM8_CH4)
 PC9 TIM8_CH4 TIM8 PWM(9) GPIO(58)
 
 # OSD
@@ -97,22 +89,23 @@ define OSD_ENABLED 1
 define HAL_OSD_TYPE_DEFAULT 1
 ROMFS_WILDCARD libraries/AP_OSD/fonts/font*.bin
 
-# Barometer - VYRIY uses DPS310 on I2C2 (index 0 = first in I2C_ORDER)
+# Barometer
 define AP_BARO_DPS310_ENABLED 1
 BARO DPS310 I2C:0:0x76
 
-# IMU - VYRIY rotation is CW90 = YAW_90
+# IMU
 SPIDEV imu1 SPI1 DEVID1 GYRO1_CS MODE3 1*MHZ 8*MHZ
 IMU Invensensev3 SPI:imu1 ROTATION_YAW_90
 
-# SDCard on SPI2
+# SDCard
 SPIDEV sdcard SPI2 DEVID3 SDCARD1_CS MODE0 400*KHZ 25*MHZ
 
-# DMA - TIM8_UP исключён чтобы PWM9 работал как серво
-DMA_NOSHARE TIM4_UP TIM3_UP TIM8_UP SPI1*
+# DMA configuration
+DMA_NOSHARE TIM4_UP TIM3_UP SPI1*
 DMA_PRIORITY TIM4_UP TIM3_UP SPI1*
 
-define ALLOW_ARM_NO_COMPASS
+# General Defines
+define ALLOW_ARM_NO_COMPASS 1
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
@@ -120,21 +113,15 @@ define HAL_DEFAULT_INS_FAST_SAMPLE 3
 define HAL_FRAME_TYPE_DEFAULT 12
 define HAL_OS_FATFS_IO 1
 
-# minimize_fpv_osd.inc закомментирован — конфликтовал с HAL_MOUNT_ENABLED
-# include ../include/minimize_fpv_osd.inc
-
-# --- VYRIY custom feature overrides ---
-
-# Disable OpticalFlow - не нужен, экономим флеш
+# Resource Overrides
 define AP_OPTICALFLOW_ENABLED 0
-
-# Enable AP_Mount для серво тилта на S9
 define HAL_MOUNT_ENABLED 1
-
-# Включить только Servo gimbal тип крепления
 define HAL_MOUNT_SERVO_ENABLED 1
-
 define DEFAULT_NTF_LED_TYPES 0
+
+# Force enable 9th PWM channel
+define BOARD_PWM_COUNT_DEFAULT 9
+
 
 
 
