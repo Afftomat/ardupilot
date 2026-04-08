@@ -1,9 +1,15 @@
 include ../speedybeef4v4/hwdef.dat
 
-# Принудительно включаем драйвер барометра
-define AP_BARO_DPS310_ENABLED 1
+# 1. Отключаем барометр SpeedyBee (SPL06)
+undef AP_BARO_SPL06_ENABLED
+undef BARO
 
-# Переназначаем барометр на I2C2 (PB10/PB11)
+# 2. Включаем наш барометр DPS310
+define AP_BARO_DPS310_ENABLED 1
+define AP_BARO_BACKEND_DEFAULT_ENABLED 1
+BARO DPS310 I2C:0:0x76
+
+# 3. Настраиваем I2C2 (PB10/PB11)
 undef PB10
 undef PB11
 PB10 I2C2_SCL I2C2
@@ -12,13 +18,9 @@ PB11 I2C2_SDA I2C2
 undef I2C_ORDER
 I2C_ORDER I2C2 I2C1
 
-undef BARO
-BARO DPS310 I2C:0:0x76
-
-# ГЛАВНАЯ СТРОКА: говорим использовать загрузчик от SpeedyBee
-env set ROMFS_FILES [('bootloader.bin', 'Tools/bootloaders/speedybeef4v4_bl.bin')]
-
+# 4. Параметры памяти
 define FLASH_BOOTLOADER_LOAD_KB 48
+
 
 
 
