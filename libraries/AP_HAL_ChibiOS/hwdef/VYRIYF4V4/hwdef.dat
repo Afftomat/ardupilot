@@ -75,7 +75,8 @@ PB4 TIM3_CH1 TIM3 PWM(8) GPIO(57)
 # TIM5 не пересекается ни с TIM3/TIM4 (моторы), ни с TIM8 (конфликты)
 PA0 TIM5_CH1 TIM5 PWM(9) GPIO(58)
 
-# DMA — TIM5_UP не шарится с моторными таймерами
+# DMA
+DMA_PRIORITY SPI3* SPI2* SPI1* UART* TIM*
 DMA_NOSHARE TIM4_UP TIM3_UP TIM5_UP SPI1*
 
 # ---------- Gimbal / Mount ----------
@@ -91,6 +92,7 @@ define OSD_ENABLED 1
 
 # ---------- Optical Flow — отключён ----------
 define AP_OPTICALFLOW_ENABLED 0
+
 
 
 
