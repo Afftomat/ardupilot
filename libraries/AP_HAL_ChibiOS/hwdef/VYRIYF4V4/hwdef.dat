@@ -10,6 +10,12 @@ define HAL_STORAGE_SIZE 16384
 define STORAGE_FLASH_PAGE 1
 STM32_ST_USE_TIMER 5
 
+# --- КРИТИЧЕСКИЕ ПРАВКИ ДЛЯ S9 ---
+# Отключаем DMA для TIM8, чтобы оживить PWM(9) на PC9
+define HAL_NO_DMA_TIMER8
+# Убеждаемся, что PC9 не захвачен под реле питания VTX
+undef HAL_GPIO_PIN_58
+
 # SPI1 - IMU
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -75,7 +81,7 @@ PC2 RSSI_ADC ADC1
 define BOARD_RSSI_ANA_PIN 12
 define HAL_BATT_MONITOR_DEFAULT 4
 
-# MOTORS (TIM4 и TIM3 остаются в DMA для DShot)
+# MOTORS (TIM4 и TIM3)
 PB6 TIM4_CH1 TIM4 PWM(1) GPIO(50)
 PB7 TIM4_CH2 TIM4 PWM(2) GPIO(51)
 PB8 TIM4_CH3 TIM4 PWM(3) GPIO(52)
@@ -85,8 +91,8 @@ PB1 TIM3_CH4 TIM3 PWM(6) GPIO(55)
 PB5 TIM3_CH2 TIM3 PWM(7) GPIO(56)
 PB4 TIM3_CH1 TIM3 PWM(8) GPIO(57)
 
-# SERVO S9 (PC9 на TIM8) - Убираем DMA через hwdef настройки ниже
-PC9 TIM8_CH4 TIM8 PWM(9) GPIO(58)
+# SERVO S9 - Добавлен NODMA для принудительного PWM режима
+PC9 TIM8_CH4 TIM8 PWM(9) GPIO(58) NODMA
 
 # LEDs
 PC8 LED0 OUTPUT LOW GPIO(90)
@@ -111,13 +117,9 @@ IMU Invensensev3 SPI:imu1 ROTATION_YAW_90
 SPIDEV sdcard SPI2 DEVID3 SDCARD1_CS MODE0 400*KHZ 25*MHZ
 
 # DMA CONFIGURATION
-# УДАЛЕН TIM8_UP, чтобы PWM(9) работал как обычная серва без конфликтов с DShot
+# TIM8_UP УДАЛЕН из DMA списков
 DMA_NOSHARE TIM4_UP TIM3_UP SPI1*
 DMA_PRIORITY TIM4_UP TIM3_UP SPI1*
-
-# Освобождаем PC9 от функции Relay (VTX Switch), если она была в инклудах
-define HAL_BATT_VOLT_PIN 10
-define HAL_BATT_CURR_PIN 11
 
 define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
@@ -135,10 +137,8 @@ define AP_OPTICALFLOW_ENABLED 0
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
 
-# Отключаем дефолтные реле, чтобы не заняли PC9 (GPIO 58)
-define HAL_GPIO_RELEYS_ENABLED 0
-
 define DEFAULT_NTF_LED_TYPES 257
+
 
 
 
