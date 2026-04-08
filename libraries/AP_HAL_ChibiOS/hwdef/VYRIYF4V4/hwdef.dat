@@ -1,8 +1,6 @@
-# hw definition file for VYRIY F4 V4 (STM32F405)
-# Наследуем всё от оригинала, чтобы не было ошибок
 include ../speedybeef4v4/hwdef.dat
 
-# Принудительно включаем то, что нам нужно
+# Принудительно включаем драйвер барометра
 define AP_BARO_DPS310_ENABLED 1
 
 # Переназначаем барометр на I2C2 (PB10/PB11)
@@ -17,10 +15,11 @@ I2C_ORDER I2C2 I2C1
 undef BARO
 BARO DPS310 I2C:0:0x76
 
-# PC9 (S9) уже есть в оригинале SpeedyBee V4 как PWM9. 
-# Мы его не трогаем, чтобы не было ошибки Duplicate GPIO.
+# ГЛАВНАЯ СТРОКА: говорим использовать загрузчик от SpeedyBee
+env set ROMFS_FILES [('bootloader.bin', 'Tools/bootloaders/speedybeef4v4_bl.bin')]
 
 define FLASH_BOOTLOADER_LOAD_KB 48
+
 
 
 
