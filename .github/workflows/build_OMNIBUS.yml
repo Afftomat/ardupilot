@@ -1,0 +1,31 @@
+name: Build OMNIBUS F4 V5 PWM
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+
+      - name: Install Tools
+        run: |
+          sudo apt update
+          sudo apt install gcc-arm-none-eabi python3-pip -y
+          pip3 install empy==3.3.4 future lxml --break-system-packages
+
+      - name: Configure and Build
+        run: |
+          mkdir -p Tools/bootloaders
+          touch Tools/bootloaders/OMNIBUSF4V5_5PWM_SERVO_bl.bin
+          ./waf configure --board OMNIBUSF4V5_5PWM_SERVO
+          ./waf copter
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: OMNIBUS_F4_V5_Firmware
+          path: build/OMNIBUSF4V5_5PWM_SERVO/bin/arducopter.apj
+
