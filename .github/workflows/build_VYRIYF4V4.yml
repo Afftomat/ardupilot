@@ -23,7 +23,7 @@ jobs:
           touch Tools/bootloaders/VYRIYF4V4_bl.bin
           
           # 2. Настраиваем плату
-          ./waf configure --board VYRIYF4V4
+          ./waf configure --board OMNIBUSF4V5_5PWM_SERVO
           
           # 3. Собираем прошивку
           ./waf copter
