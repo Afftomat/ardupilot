@@ -1,8 +1,8 @@
 # hw definition для OMNIBUSF4V5 с 4 моторами (DShot) и 1 Серво (PWM) на M5
-# Сделано на базе оригинального OmnibusF4V5
 
 MCU STM32F4xx STM32F405xx
-APJ_BOARD_ID 131
+# Исправлено: используем имя таргета вместо цифры 131
+APJ_BOARD_ID OMNIBUSF4V5
 OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 
@@ -21,7 +21,7 @@ PB12 OSD1_CS CS
 PB3  FLASH_CS CS
 
 # Индикация и звук
-PB4 TIM3_CH1 TIM3 PWM(6) GPIO(55) NODMA # Бывший LED_STRIP, можно как доп. выход
+PB4 TIM3_CH1 TIM3 PWM(6) GPIO(55) NODMA 
 PB5 BUZZER OUTPUT GPIO(80) LOW
 define HAL_BUZZER_PIN 80
 
@@ -34,7 +34,7 @@ PA10 USART1_RX USART1
 PC6  USART6_TX USART6
 PC7  USART6_RX USART6
 PA0  UART4_TX UART4
-#PA1  UART4_RX UART4
+# PA1 UART4_RX UART4  # ЗАКОММЕНТИРОВАНО: пин PA1 отдан под СЕРВО (M5)
 PC10 USART3_TX USART3
 PC11 USART3_RX USART3
 
@@ -51,16 +51,14 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 31.0
 
-# --- МОТОРЫ 1-4 (TIM4) ---
-# На Omnibus F4 V5 моторы 1-4 сидят на PB6-PB9 (совпадают с I2C1)
-# ВНИМАНИЕ: Если используете I2C (компас), моторы нужно переносить.
-# Но в стандартной разводке Omnibus:
+# --- МОТОРЫ 1-4 (Стандартная раскладка Omnibus F4 V5) ---
 PC8 TIM8_CH3 TIM8 PWM(1) GPIO(50)
 PC9 TIM8_CH4 TIM8 PWM(2) GPIO(51)
 PA15 TIM2_CH1 TIM2 PWM(3) GPIO(52)
 PA8 TIM1_CH1 TIM1 PWM(4) GPIO(53)
 
 # --- СЕРВО НА ПЛОЩАДКУ M5 (PA1, TIM5) ---
+# Теперь PA1 используется только здесь. NODMA обязателен.
 PA1 TIM5_CH2 TIM5 PWM(5) GPIO(54) NODMA
 
 # Периферия
@@ -72,3 +70,4 @@ define HAL_OSD_TYPE_DEFAULT 1
 DMA_NOSHARE TIM8_UP TIM1_UP SPI1*
 define HAL_MOUNT_ENABLED 1
 define HAL_MOUNT_SERVO_ENABLED 1
+
