@@ -1,8 +1,9 @@
 # hw definition file for processing by chibios_pins.py
-# Omnibus F4 PRO — ФИНАЛЬНАЯ ВЕРСИЯ
-# Серва на PWM5 (PA1/TIM5_CH2) РАБОТАЕТ
-# Системный таймер — TIM2 (32-бит), освобождает TIM5 под серво
-# Компас на I2C2 (PB10/PB11) — USART3 убран, пины чистые
+# Omnibus F4 PRO — квадрокоптер + серва
+# PWM1-4: моторы на TIM5 (OneShot/PWM, не DShot)
+# PWM5:   серва на TIM1_CH1 (PA8, пад PWM6 на плате)
+# Системный таймер: TIM2 (32-бит, освобождает TIM5)
+# Компас: I2C2 (PB10/PB11)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -10,29 +11,23 @@ OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# Системный таймер на TIM2 (32-бит) — TIM5 свободен под серво
+# TIM2 — системный таймер ChibiOS (32-бит)
+# TIM5 — свободен под моторы + серва разделены по таймерам
 STM32_ST_USE_TIMER 2
 
-# --- I2C — компас ---
+# --- I2C компас ---
 I2C_ORDER I2C2
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 
 # --- UART ---
-# USART3 убран — PB10/PB11 заняты I2C2
 SERIAL_ORDER OTG1 USART1 USART6 UART4
-
 PA9  USART1_TX USART1
 PA10 USART1_RX USART1
-
 PC6  USART6_TX USART6
 PC7  USART6_RX USART6
-
-# UART4 — для GPS или телеметрии (PA0 TX, PA1 RX — только в ALT режиме)
-# В базовом режиме PA0/PA1 заняты PWM5/6, UART4 недоступен без ALT_CONFIG
-# Оставляем как ALT(2) на случай если серва не нужна
-PA0 UART4_TX UART4 ALT(2)
-PA1 UART4_RX UART4 ALT(2)
+PA0  UART4_TX UART4 ALT(2)
+PA1  UART4_RX UART4 ALT(2)
 
 # --- ADC ---
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
@@ -44,26 +39,16 @@ define HAL_BATT_CURR_SCALE 18.2
 define HAL_BATT_MONITOR_DEFAULT 4
 
 # --- PWM ---
-# PWM1-2: TIM1 — моторы (DShot)
-# PWM3-5: TIM5 — моторы PWM3/4 + СЕРВО PWM5
-# PWM6:   TIM5_CH1 — доп. канал (VTX/камера)
-# Все TIM5 каналы: PWM3/4 моторы + PWM5 серво = КОНФЛИКТ режимов!
-# ПРАВИЛЬНО: моторы 1-4 только на TIM1, серво на TIM5
-# TIM1 имеет 4 канала: CH1=PA8, CH2N=PB0, CH3N=PB1, CH4=нет на этих пинах
-# Моторы 1-4 на TIM1: PWM1(PB0), PWM2(PB1), PWM3(PA8?нет занят), ...
-# На этой плате физически: PB0=TIM1_CH2N, PB1=TIM1_CH3N, PA2=TIM5_CH3, PA3=TIM5_CH4
-# Нельзя 4 мотора на TIM1 — только 2 канала доступны (PB0, PB1)
-# ИТОГ: 2 мотора на TIM1, 2 мотора на отдельных каналах TIM5, серва на TIM5_CH2
-# Но смешивать DShot и PWM на TIM5 нельзя — значит TIM5 весь в PWM режиме (не DShot)
-# Моторы на TIM5 работают через обычный PWM или OneShot, не Bdshot
-PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
-PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-PA3 TIM5_CH4  TIM5 PWM(3) GPIO(52)
-PA2 TIM5_CH3  TIM5 PWM(4) GPIO(53)
-PA1 TIM5_CH2  TIM5 PWM(5) GPIO(54)
-PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55)
-PC8 TIM8_CH3  TIM8 PWM(7) GPIO(56)
-PC9 TIM8_CH4  TIM8 PWM(8) GPIO(59)
+# Моторы 1-4: все на TIM5 (один таймер = одинаковый режим, нет конфликта)
+# Серва PWM5: TIM1_CH1 (PA8) — отдельный таймер
+PA3 TIM5_CH4 TIM5 PWM(1) GPIO(50)
+PA2 TIM5_CH3 TIM5 PWM(2) GPIO(51)
+PA1 TIM5_CH2 TIM5 PWM(3) GPIO(52)
+PA0 TIM5_CH1 TIM5 PWM(4) GPIO(53)
+PA8 TIM1_CH1 TIM1 PWM(5) GPIO(54)
+PB0 TIM1_CH2N TIM1 PWM(6) GPIO(55)
+PC8 TIM8_CH3 TIM8 PWM(7) GPIO(56)
+PC9 TIM8_CH4 TIM8 PWM(8) GPIO(59)
 
 # --- SPI ---
 PA4 MPU6000_CS CS
@@ -82,7 +67,7 @@ PC10 SPI3_SCK SPI3
 PC11 SPI3_MISO SPI3
 PC12 SPI3_MOSI SPI3
 
-# --- Индикация / сервис ---
+# --- Индикация ---
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
 define HAL_GPIO_B_LED_PIN 2
@@ -111,18 +96,14 @@ define AP_BARO_BACKEND_DEFAULT_ENABLED 0
 define AP_BARO_BMP280_ENABLED 1
 
 # --- Компас ---
-# Внешний компас на I2C2 (PB10/PB11)
-# USART3 убран — пины полностью свободны для I2C
 define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
 # --- DMA ---
-# TIM1 и TIM5 изолированы — TIM5 в PWM режиме (не DShot)
-# Если нужен DShot только на PWM1/2 (TIM1) — это возможно
-DMA_NOSHARE TIM1_UP TIM5_UP SPI1*
-DMA_PRIORITY TIM1_UP TIM5_UP SPI1*
+DMA_NOSHARE TIM5_UP TIM1_UP SPI1*
+DMA_PRIORITY TIM5_UP TIM1_UP SPI1*
 
 # --- Хранилище ---
 STORAGE_FLASH_PAGE 1
@@ -146,6 +127,7 @@ define HAL_QUADPLANE_ENABLED 0
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
 define HAL_MOUNT_SERVO_ENABLED 1
+
 
 
 
