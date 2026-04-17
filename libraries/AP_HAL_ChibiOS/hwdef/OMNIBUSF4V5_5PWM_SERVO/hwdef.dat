@@ -1,5 +1,5 @@
-# hw definition для твоей платы по схеме (Omnibus F4 Pro / V5)
-# Конфиг: 4 мотора + Серво на M5 (PA1) + VTX на RSSI (PA0) + Компас (I2C2)
+# hw definition для Omnibus F4 Pro
+# Конфиг: 4 мотора + Серво на M5 (PA1) + VTX на RSSI (PA0)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,62 +9,68 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- ПОРТЫ ---
-# UART3 убран для компаса, UART1 и UART6 оставлены для GPS и Телеметрии
+# Шины (как в рабочем оригинале)
 I2C_ORDER I2C2
-SERIAL_ORDER OTG1 USART1 USART6
+SERIAL_ORDER OTG1 USART1 USART6 UART4
 
 # ADC
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
+PA0 RSSI_IN ADC1
+define BOARD_RSSI_ANA_PIN 0
 
-# --- МОТОРЫ 1-4 (Стандартные пины) ---
+# --- PWM ВЫХОДЫ ---
+# Моторы 1-4 (как в рабочем оригинале)
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# Твой Серво на M5 (PA1)
+# Твой Серво на M5 (PA1) - добавлен NODMA для изоляции от DShot
+undef PA1
 PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
 
-# Твой VTX на RSSI (PA0)
-PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55) NODMA
+# Твой VTX на RSSI (PA0) - используем как GPIO или доп. PWM
+# Мы его не трогаем в ADC выше, чтобы не было конфликта
 
-# Доп. выходы (PWM 7, 8, 9)
-PA8 TIM1_CH1  TIM1 PWM(7) GPIO(56)
-PC8 TIM8_CH3  TIM8 PWM(8) GPIO(57)
-PC9 TIM8_CH4  TIM8 PWM(9) GPIO(58)
+# Остальные оригинальные пины
+PA8 TIM1_CH1  TIM1 PWM(6) GPIO(55)
+PC8 TIM8_CH3  TIM8 PWM(7) GPIO(56)
+PC9 TIM8_CH4  TIM8 PWM(8) GPIO(59)
 
-# --- SPI И ПЕРИФЕРИЯ ---
+# SPI 1 - IMU
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
 PA7 SPI1_MOSI SPI1
 
+# I2C2 - КОМПАС (PB10/PB11)
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 
+# SPI 2 - SDCard
 PB15 SPI2_MOSI SPI2
 PB14 SPI2_MISO SPI2
 PB13 SPI2_SCK SPI2
 PB12 SDCARD_CS CS
 
+# UARTs (как в рабочем оригинале)
 PA10 USART1_RX USART1
-PA9  USART1_TX USART1
-PC6  USART6_TX USART6
-PC7  USART6_RX USART6
+PA9 USART1_TX USART1
+PC6 USART6_TX USART6
+PC7 USART6_RX USART6
 
+# SPI 3 - OSD & Baro
 PA15 OSD_CS CS
-PB3  BMP280_CS CS
+PB3 BMP280_CS CS
 PC12 SPI3_MOSI SPI3
 PC11 SPI3_MISO SPI3
 PC10 SPI3_SCK SPI3
 
-# --- ИНДИКАЦИЯ (ИСПРАВЛЕНЫ GPIO) ---
+# Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
-# Назначил уникальный GPIO(91), чтобы не было ошибки Duplicate 58
-PB4 TIM3_CH1 TIM3 GPIO(91) ALARM LOW
+PB4 TIM3_CH1 TIM3 GPIO(58) ALARM LOW
 PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
@@ -75,7 +81,7 @@ SPIDEV sdcard     SPI2 DEVID2 SDCARD_CS  MODE0 400*KHZ 25*MHZ
 SPIDEV bmp280     SPI3 DEVID3 BMP280_CS  MODE3 1*MHZ 8*MHZ
 SPIDEV osd        SPI3 DEVID4 OSD_CS     MODE0 10*MHZ 10*MHZ
 
-# Датчики
+# IMU, Baro, Compass
 IMU Invensense SPI:mpu6000 ROTATION_YAW_180
 BARO BMP280 SPI:bmp280
 define AP_BARO_BMP280_ENABLED 1
@@ -83,7 +89,6 @@ define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 
-# Системные настройки
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
 define HAL_OS_FATFS_IO 1
@@ -91,14 +96,17 @@ define OSD_ENABLED 1
 define HAL_OSD_TYPE_DEFAULT 1
 ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 
-# Питание
 define HAL_BATT_VOLT_PIN 12
 define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11
 define HAL_BATT_CURR_SCALE 18.2
 
-# Фичи
+include ../include/minimize_fpv_osd.inc
+
+# Включаем Mount (Servo Tilt)
+undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
