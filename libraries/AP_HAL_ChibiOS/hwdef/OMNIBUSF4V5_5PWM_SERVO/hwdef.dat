@@ -1,9 +1,8 @@
 # hw definition для OMNIBUSF4V5
 # Конфиг: 4 мотора (DShot) + 1 Серво (PWM) на M5 + Компас (I2C1)
-# Исправлено: удален конфликт PA1 (UART4_RX)
 
 MCU STM32F4xx STM32F405xx
-APJ_BOARD_ID 131
+APJ_BOARD_ID HAL_BOARD_SUBTYPE_CHIBIOS_OMNIBUSF4V5
 OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 
@@ -26,7 +25,6 @@ PB5 BUZZER OUTPUT GPIO(80) LOW
 define HAL_BUZZER_PIN 80
 
 # UART порты
-# PA1 удален из UART4_RX, так как он занят Серво на M5
 SERIAL_ORDER OTG1 USART1 USART6 UART4 USART3
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
@@ -38,7 +36,7 @@ PA0  UART4_TX UART4
 PC10 USART3_TX USART3
 PC11 USART3_RX USART3
 
-# --- I2C1 ДЛЯ КОМПАСА (SCL/SDA) ---
+# --- I2C1 ДЛЯ КОМПАСА ---
 I2C_ORDER I2C1
 PB6 I2C1_SCL I2C1
 PB7 I2C1_SDA I2C1
@@ -60,7 +58,7 @@ PA8 TIM1_CH1 TIM1 PWM(4) GPIO(53)
 # --- СЕРВО НА S5 (Площадка M5, PA1, TIM5) ---
 PA1 TIM5_CH2 TIM5 PWM(5) GPIO(54) NODMA
 
-# Глушим LED_STRIP (PB1), чтобы не мешал
+# Глушим LED_STRIP (PB1)
 PB1 PB1 OUTPUT LOW GPIO(90)
 
 # Периферия и OSD
@@ -77,6 +75,7 @@ define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 
 include ../include/minimize_fpv_osd.inc
+
 
 
 
