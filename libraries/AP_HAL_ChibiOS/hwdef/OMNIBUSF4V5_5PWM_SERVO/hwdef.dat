@@ -1,5 +1,5 @@
-# hw definition для твоего Omnibus F4 Pro
-# Конфиг: 4 мотора + Серво на PA1 + VTX на PA0 (GPIO) + Компас (I2C2)
+# hw definition для Omnibus F4 Pro (Custom)
+# 4 мотора (DShot) + Серво (M5) с отделением NODMA + VTX (RSSI) + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,11 +9,11 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# Шины (как в рабочем оригинале)
+# Шины (I2C2 на PB10/11 для компаса)
 I2C_ORDER I2C2
 SERIAL_ORDER OTG1 USART1 USART6
 
-# ADC (Батарея)
+# ADC (Только батарея)
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 
@@ -23,44 +23,43 @@ PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО ТИЛТ НА PA1 (M5) ---
+# --- СЕРВО НА M5 (PA1) - ОТДЕЛЯЕМ КАНАЛ (Matek Style) ---
+# PA1 делит TIM2 с моторами 3 и 4. NODMA заставляет его работать в PWM,
+# пока моторы крутят DShot.
 PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
 
-# --- VTX CONTROL НА PA0 (RSSI) ---
-# Делаем GPIO, чтобы не конфликтовать с TIM5 (System Tick)
+# --- VTX CONTROL НА RSSI (PA0) ---
 PA0 VTX_CTL OUTPUT LOW GPIO(55)
 
-# Доп. выходы (M6, M3, M4 по твоей схеме)
+# Доп. выходы
 PA8 TIM1_CH1  TIM1 PWM(6) GPIO(56)
 PC8 TIM8_CH3  TIM8 PWM(7) GPIO(57)
 PC9 TIM8_CH4  TIM8 PWM(8) GPIO(58)
 
-# --- SPI И ПЕРИФЕРИЯ (как в стоке) ---
+# --- ПЕРИФЕРИЯ SPI ---
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
 PA7 SPI1_MOSI SPI1
-
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
-
 PB15 SPI2_MOSI SPI2
 PB14 SPI2_MISO SPI2
 PB13 SPI2_SCK SPI2
 PB12 SDCARD_CS CS
-
-PA10 USART1_RX USART1
-PA9  USART1_TX USART1
-PC6  USART6_TX USART6
-PC7  USART6_RX USART6
-
 PA15 OSD_CS CS
 PB3  BMP280_CS CS
 PC12 SPI3_MOSI SPI3
 PC11 SPI3_MISO SPI3
 PC10 SPI3_SCK SPI3
 
-# Индикация (исправлен Duplicate GPIO)
+# UARTs
+PA10 USART1_RX USART1
+PA9  USART1_TX USART1
+PC6  USART6_TX USART6
+PC7  USART6_RX USART6
+
+# Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
 PB4 TIM3_CH1 TIM3 GPIO(100) ALARM LOW
@@ -74,7 +73,6 @@ SPIDEV sdcard     SPI2 DEVID2 SDCARD_CS  MODE0 400*KHZ 25*MHZ
 SPIDEV bmp280     SPI3 DEVID3 BMP280_CS  MODE3 1*MHZ 8*MHZ
 SPIDEV osd        SPI3 DEVID4 OSD_CS     MODE0 10*MHZ 10*MHZ
 
-# IMU, Baro, Compass
 IMU Invensense SPI:mpu6000 ROTATION_YAW_180
 BARO BMP280 SPI:bmp280
 define AP_BARO_BMP280_ENABLED 1
@@ -99,6 +97,7 @@ include ../include/minimize_fpv_osd.inc
 
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
