@@ -1,18 +1,22 @@
-# hw definition для Omnibus F4 Pro
-# Моторы 1-4 отдельно, Серво (PA1) на TIM2 отдельно. Исправлен Batt Monitor.
+# hw definition Omnibus F4 Pro (Matek/Chupacabra Style)
+# Моторы 1-4 в одной куче (TIM2), Серво на TIM5 отдельно
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
 
 OSCILLATOR_HZ 8000000
-STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
+# --- ГЛАВНЫЙ СЕКРЕТ ---
+# Переносим системный таймер на TIM3, чтобы полностью освободить TIM5 под серву
+STM32_ST_USE_TIMER 3
+
+# Шины (Компас на месте)
 I2C_ORDER I2C2
 SERIAL_ORDER OTG1 USART1 USART6
 
-# ADC (Исправлено: добавлены все необходимые дефайны)
+# ADC (Питание без ошибок)
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 define HAL_BATT_VOLT_PIN 12
@@ -20,26 +24,23 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
-# --- МОТОРЫ 1-4 (Группа DShot на TIM1 и TIM8) ---
-# Моторы 1 и 2 на TIM1
-PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
-PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-# Моторы 3 и 4 переносим на TIM8 (площадки PC8, PC9), чтобы освободить TIM2
-PC8 TIM8_CH3  TIM8 PWM(3) GPIO(52)
-PC9 TIM8_CH4  TIM8 PWM(4) GPIO(53)
+# --- МОТОРЫ 1-4 (В ОДНОЙ КУЧЕ НА TIM2) ---
+# Теперь DShot работает синхронно на одной группе таймеров
+PB0 TIM2_CH2 TIM2 PWM(1) GPIO(50)  # M1
+PB1 TIM2_CH3 TIM2 PWM(2) GPIO(51)  # M2
+PA3 TIM2_CH4 TIM2 PWM(3) GPIO(52)  # M3
+PA2 TIM2_CH1 TIM2 PWM(4) GPIO(53)  # M4
 
-# --- СЕРВО НА PA1 (Теперь ОДНА на таймере TIM2) ---
-# Теперь DShot на других моторах никак не влияет на работу сервы
-PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54)
+# --- СЕРВО И VTX (ОТДЕЛЬНО НА TIM5) ---
+# Полная изоляция от моторов, как в лучших платах
+PA1 TIM5_CH2 TIM5 PWM(5) GPIO(54) NODMA  # Серво на M5
+PA0 TIM5_CH1 TIM5 PWM(6) GPIO(55) NODMA  # VTX на RSSI
 
-# --- VTX НА PA0 (GPIO) ---
-PA0 VTX_CTL OUTPUT LOW GPIO(55)
-
-# --- КОМПАС (I2C2 на PB10/PB11) ---
+# --- КОМПАС (PB10/PB11) ---
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 
-# SPI Периферия
+# Периферия SPI (как в стоке)
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -92,6 +93,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
