@@ -1,9 +1,7 @@
 # hw definition file for processing by chibios_pins.py
 # Omnibus F4 PRO — квадрокоптер + серва
-# PWM1-4: моторы на TIM5 (OneShot/PWM, не DShot)
-# PWM5:   серва на TIM1_CH1 (PA8, пад PWM6 на плате)
-# Системный таймер: TIM2 (32-бит, освобождает TIM5)
-# Компас: I2C2 (PB10/PB11)
+# Базируется на рабочем конфиге пользователя (серва работала)
+# Изменения: убран RSSI (PA0 пустой), добавлен HAL_COMPASS_AUTO_ROT_DEFAULT
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -11,8 +9,6 @@ OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# TIM2 — системный таймер ChibiOS (32-бит)
-# TIM5 — свободен под моторы + серва разделены по таймерам
 STM32_ST_USE_TIMER 2
 
 # --- I2C компас ---
@@ -21,13 +17,13 @@ PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 
 # --- UART ---
-SERIAL_ORDER OTG1 USART1 USART6 UART4
+SERIAL_ORDER OTG1 USART1 USART6
+
 PA9  USART1_TX USART1
 PA10 USART1_RX USART1
+
 PC6  USART6_TX USART6
 PC7  USART6_RX USART6
-PA0  UART4_TX UART4 ALT(2)
-PA1  UART4_RX UART4 ALT(2)
 
 # --- ADC ---
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
@@ -38,17 +34,13 @@ define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 define HAL_BATT_MONITOR_DEFAULT 4
 
-# --- PWM ---
-# Моторы 1-4: все на TIM5 (один таймер = одинаковый режим, нет конфликта)
-# Серва PWM5: TIM1_CH1 (PA8) — отдельный таймер
-PA3 TIM5_CH4 TIM5 PWM(1) GPIO(50)
-PA2 TIM5_CH3 TIM5 PWM(2) GPIO(51)
-PA1 TIM5_CH2 TIM5 PWM(3) GPIO(52)
-PA0 TIM5_CH1 TIM5 PWM(4) GPIO(53)
-PA8 TIM1_CH1 TIM1 PWM(5) GPIO(54)
-PB0 TIM1_CH2N TIM1 PWM(6) GPIO(55)
-PC8 TIM8_CH3 TIM8 PWM(7) GPIO(56)
-PC9 TIM8_CH4 TIM8 PWM(8) GPIO(59)
+# --- МОТОРЫ 1-4 + СЕРВА (как в рабочем конфиге) ---
+PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
+PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
+PA3 TIM5_CH4  TIM5 PWM(3) GPIO(52)
+PA2 TIM5_CH3  TIM5 PWM(4) GPIO(53)
+PA1 TIM5_CH2  TIM5 PWM(5) GPIO(54)
+PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55)
 
 # --- SPI ---
 PA4 MPU6000_CS CS
@@ -102,8 +94,8 @@ define HAL_I2C_INTERNAL_MASK 0
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
 # --- DMA ---
-DMA_NOSHARE TIM5_UP TIM1_UP SPI1*
-DMA_PRIORITY TIM5_UP TIM1_UP SPI1*
+DMA_NOSHARE TIM1_UP TIM5_UP SPI1*
+DMA_PRIORITY TIM1_UP TIM5_UP SPI1*
 
 # --- Хранилище ---
 STORAGE_FLASH_PAGE 1
@@ -127,6 +119,7 @@ define HAL_QUADPLANE_ENABLED 0
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
 define HAL_MOUNT_SERVO_ENABLED 1
+
 
 
 
