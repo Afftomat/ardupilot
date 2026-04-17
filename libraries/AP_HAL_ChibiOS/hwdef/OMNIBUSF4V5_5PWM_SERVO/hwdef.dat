@@ -1,5 +1,5 @@
-# hw definition для Omnibus F4 Pro (Custom)
-# Конфиг: 4 мотора + 1 Серво (M5) + VTX (RSSI) + Компас (I2C2)
+# Финальный вычищенный hwdef для твоего Omnibus F4 Pro
+# 4 мотора (DShot) + Серво (M5) + VTX (RSSI) + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,7 +9,6 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# Шины (I2C2 на PB10/11 для компаса)
 I2C_ORDER I2C2
 SERIAL_ORDER OTG1 USART1 USART6
 
@@ -17,20 +16,24 @@ SERIAL_ORDER OTG1 USART1 USART6
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 
-# --- МОТОРЫ 1-4 ---
+# --- PWM ВЫХОДЫ ---
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- ОТДЕЛЕННЫЕ ВЫХОДЫ (NODMA) ---
-# Пин M5 для Серво
+# Твой Серво на M5 (PA1)
 PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
 
-# Пин RSSI для VTX Control
+# Твой VTX на RSSI (PA0)
 PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55) NODMA
 
-# --- ПЕРИФЕРИЯ ---
+# Доп. выходы
+PA8 TIM1_CH1  TIM1 PWM(7) GPIO(56)
+PC8 TIM8_CH3  TIM8 PWM(8) GPIO(57)
+PC9 TIM8_CH4  TIM8 PWM(9) GPIO(58)
+
+# --- SPI И ПЕРИФЕРИЯ ---
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -55,6 +58,7 @@ PC12 SPI3_MOSI SPI3
 PC11 SPI3_MISO SPI3
 PC10 SPI3_SCK SPI3
 
+# Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
 PB4 TIM3_CH1 TIM3 GPIO(58) ALARM LOW
@@ -62,12 +66,13 @@ PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
 
-# --- ТАБЛИЦА УСТРОЙСТВ (ИСПРАВЛЕНО) ---
+# Таблица устройств
 SPIDEV mpu6000    SPI1 DEVID1 MPU6000_CS MODE3 1*MHZ 8*MHZ
 SPIDEV sdcard     SPI2 DEVID2 SDCARD_CS  MODE0 400*KHZ 25*MHZ
 SPIDEV bmp280     SPI3 DEVID3 BMP280_CS  MODE3 1*MHZ 8*MHZ
 SPIDEV osd        SPI3 DEVID4 OSD_CS     MODE0 10*MHZ 10*MHZ
 
+# Датчики
 IMU Invensense SPI:mpu6000 ROTATION_YAW_180
 BARO BMP280 SPI:bmp280
 define AP_BARO_BMP280_ENABLED 1
@@ -75,6 +80,7 @@ define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 
+# Системные настройки
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
 define HAL_OS_FATFS_IO 1
@@ -82,14 +88,13 @@ define OSD_ENABLED 1
 define HAL_OSD_TYPE_DEFAULT 1
 ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 
+# Питание
 define HAL_BATT_VOLT_PIN 12
 define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11
 define HAL_BATT_CURR_SCALE 18.2
 
-include ../include/minimize_fpv_osd.inc
-
-undef HAL_MOUNT_ENABLED
+# Фичи
 define HAL_MOUNT_ENABLED 1
 
 
