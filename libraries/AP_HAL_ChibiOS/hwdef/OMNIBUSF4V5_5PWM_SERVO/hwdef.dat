@@ -1,5 +1,5 @@
-# Финальный вычищенный hwdef для твоего Omnibus F4 Pro
-# 4 мотора (DShot) + Серво (M5) + VTX (RSSI) + Компас (I2C2)
+# hw definition для твоей платы по схеме (Omnibus F4 Pro / V5)
+# Конфиг: 4 мотора + Серво на M5 (PA1) + VTX на RSSI (PA0) + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,6 +9,8 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
+# --- ПОРТЫ ---
+# UART3 убран для компаса, UART1 и UART6 оставлены для GPS и Телеметрии
 I2C_ORDER I2C2
 SERIAL_ORDER OTG1 USART1 USART6
 
@@ -16,7 +18,7 @@ SERIAL_ORDER OTG1 USART1 USART6
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 
-# --- PWM ВЫХОДЫ ---
+# --- МОТОРЫ 1-4 (Стандартные пины) ---
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
@@ -28,7 +30,7 @@ PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
 # Твой VTX на RSSI (PA0)
 PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55) NODMA
 
-# Доп. выходы
+# Доп. выходы (PWM 7, 8, 9)
 PA8 TIM1_CH1  TIM1 PWM(7) GPIO(56)
 PC8 TIM8_CH3  TIM8 PWM(8) GPIO(57)
 PC9 TIM8_CH4  TIM8 PWM(9) GPIO(58)
@@ -58,10 +60,11 @@ PC12 SPI3_MOSI SPI3
 PC11 SPI3_MISO SPI3
 PC10 SPI3_SCK SPI3
 
-# Индикация
+# --- ИНДИКАЦИЯ (ИСПРАВЛЕНЫ GPIO) ---
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
-PB4 TIM3_CH1 TIM3 GPIO(58) ALARM LOW
+# Назначил уникальный GPIO(91), чтобы не было ошибки Duplicate 58
+PB4 TIM3_CH1 TIM3 GPIO(91) ALARM LOW
 PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
