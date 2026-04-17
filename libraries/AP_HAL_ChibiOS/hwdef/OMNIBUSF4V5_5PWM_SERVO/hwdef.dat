@@ -1,10 +1,7 @@
-# hw definition file for processing by chibios_pins.py
-# Omnibus F4 PRO with on-board current sensor
-# Конфиг: 4 мотора + Серво на M5 (PA1) + Компас (I2C2)
+# hw definition file for Omnibus F4 PRO (Custom Build)
+# 4 мотора + Серво на M5 (PA1) + Компас (I2C2) + Все порты UART
 
 MCU STM32F4xx STM32F405xx
-
-# board ID
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
 
 OSCILLATOR_HZ 8000000
@@ -12,9 +9,9 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# Убран USART3 (конфликт с I2C2) и UART4 (конфликт с PA0/PA1)
+# Порядок шин и портов (USART3 убран, так как ноги PB10/PB11 заняты компасом)
 I2C_ORDER I2C2
-SERIAL_ORDER OTG1 USART1 USART6
+SERIAL_ORDER OTG1 USART1 USART6 UART4
 
 # ADC
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
@@ -22,16 +19,17 @@ PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 PA0 RSSI_IN ADC1
 define BOARD_RSSI_ANA_PIN 0
 
-# --- ВЫХОДЫ PWM ---
+# --- ВЫХОДЫ PWM (МОТОРЫ 1-4) ---
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# Серво на M5 (PA1)
+# --- СЕРВО НА M5 (PA1) ---
+# Убрали PA1 из альтернативных функций UART4 ниже, теперь работает только как PWM
 PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
 
-# Доп. выходы
+# Дополнительные PWM (если нужны)
 PA8 TIM1_CH1  TIM1 PWM(6) GPIO(55)
 PC8 TIM8_CH3  TIM8 PWM(7) GPIO(56)
 PC9 TIM8_CH4  TIM8 PWM(8) GPIO(59)
@@ -52,11 +50,13 @@ PB14 SPI2_MISO SPI2
 PB13 SPI2_SCK SPI2
 PB12 SDCARD_CS CS
 
-# UARTs
+# UARTs (Для GPS и периферии)
 PA10 USART1_RX USART1
 PA9 USART1_TX USART1
 PC6 USART6_TX USART6
 PC7 USART6_RX USART6
+PA0 UART4_TX UART4
+# PA1 удален из UART4_RX, чтобы работал Серво Тилт
 
 # SPI 3 - OSD & Baro
 PA15 OSD_CS CS
@@ -65,37 +65,34 @@ PC12 SPI3_MOSI SPI3
 PC11 SPI3_MISO SPI3
 PC10 SPI3_SCK SPI3
 
-# LED & Beeper
+# Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
 PB4 TIM3_CH1 TIM3 GPIO(58) ALARM LOW
+PB6 GP_GPIO OUTPUT LOW GPIO(70)
 
 # RC Input
-PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
-
-# USB
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
+PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 
-# SPI Device table 
+# Таблица устройств SPI
 SPIDEV bmi270     SPI1 DEVID1 MPU6000_CS MODE3 1*MHZ 10*MHZ 
 SPIDEV mpu6000    SPI1 DEVID1 MPU6000_CS MODE3 1*MHZ 8*MHZ
 SPIDEV sdcard     SPI2 DEVID2 SDCARD_CS MODE0 400*KHZ 25*MHZ
 SPIDEV bmp280     SPI3 DEVID3 BMP280_CS MODE3 1*MHZ 8*MHZ
 SPIDEV osd        SPI3 DEVID4 OSD_CS MODE0 10*MHZ 10*MHZ
 
-# IMU & Baro
+# IMU, Baro, Compass
 IMU Invensense SPI:mpu6000 ROTATION_YAW_180
 IMU BMI270     SPI:bmi270  ROTATION_ROLL_180
 BARO BMP280 SPI:bmp280
 define AP_BARO_BMP280_ENABLED 1
-
-# Compass
 define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 
-# Storage & OSD
+# Хранение и OSD
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
 define HAL_OS_FATFS_IO 1
@@ -103,7 +100,7 @@ define OSD_ENABLED 1
 define HAL_OSD_TYPE_DEFAULT 1
 ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 
-# Battery Setup
+# Настройки батареи
 define HAL_BATT_VOLT_PIN 12
 define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11
@@ -111,9 +108,10 @@ define HAL_BATT_CURR_SCALE 18.2
 
 include ../include/minimize_fpv_osd.inc
 
-# Mount (Servo Tilt)
+# Стабилизация подвеса
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
