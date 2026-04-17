@@ -2,7 +2,8 @@
 # Конфиг: 4 мотора (DShot) + 1 Серво (PWM) на M5 + Компас (I2C1)
 
 MCU STM32F4xx STM32F405xx
-APJ_BOARD_ID HAL_BOARD_SUBTYPE_CHIBIOS_OMNIBUSF4V5
+# Строка APJ_BOARD_ID удалена, чтобы избежать конфликтов имен
+
 OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 
@@ -75,6 +76,7 @@ define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 
 include ../include/minimize_fpv_osd.inc
+
 
 
 
