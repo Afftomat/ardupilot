@@ -1,5 +1,5 @@
-# hw definition Omnibus F4 Pro (Matek Style)
-# Моторы 1-4 на TIM1 (одна группа), Серво на TIM2 отдельно
+# hw definition Omnibus F4 Pro
+# Моторы 1-4 на своих местах, Серво (PA1) на TIM5 отдельно
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -7,9 +7,12 @@ APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
 OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
-STM32_ST_USE_TIMER 5
 
-# Шины и порты
+# --- ГЛАВНЫЙ ТРЮК ДЛЯ РАЗДЕЛЕНИЯ ---
+# Освобождаем TIM5 для сервы, перенося систему на TIM3
+STM32_ST_USE_TIMER 3
+
+# Шины и порты (USART3 убран для компаса)
 I2C_ORDER I2C2
 SERIAL_ORDER OTG1 USART1 USART6
 
@@ -21,25 +24,26 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
-# --- МОТОРЫ 1-4 (ВСЕ НА TIM1 — ОДНА ГРУППА ДЛЯ DSHOT) ---
+# --- МОТОРЫ 1-4 (ТВОЯ СТАНДАРТНАЯ КОЛОДКА) ---
+# Группа 1 (TIM1)
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-PA8 TIM1_CH1  TIM1 PWM(3) GPIO(52)
-# Четвертый мотор программно привязываем к TIM1 (используем свободный ресурс)
-PA2 TIM1_CH3  TIM1 PWM(4) GPIO(53) 
+# Группа 2 (TIM2)
+PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
+PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО НА PA1 (ТЕПЕРЬ ОНА ОДНА НА TIM2) ---
-# Больше никаких конфликтов с DShot моторов
-PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54)
+# --- СЕРВО НА PA1 (M5) ---
+# Теперь она на TIM5 и DShot моторов (на TIM1/2) ей НЕ МЕШАЕТ
+PA1 TIM5_CH2  TIM5 PWM(5) GPIO(54)
 
-# --- VTX НА PA0 (GPIO) ---
-PA0 VTX_CTL OUTPUT LOW GPIO(55)
+# --- VTX НА PA0 (RSSI) ---
+PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55)
 
 # --- КОМПАС (PB10/PB11) ---
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 
-# Периферия SPI
+# SPI Периферия
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -56,17 +60,17 @@ PC10 SPI3_SCK SPI3
 PC11 SPI3_MISO SPI3
 PC12 SPI3_MOSI SPI3
 
-# UARTs (GPS на 6-м порту)
+# UARTs
 PA10 USART1_RX USART1
 PA9  USART1_TX USART1
 PC6  USART6_TX USART6
 PC7  USART6_RX USART6
 
-# Индикация
-PB5 LED_BLUE OUTPUT LOW GPIO(1)
-define HAL_GPIO_A_LED_PIN 1
+# Индикация (Beeper на GPIO без таймера)
 PB4 PB4 OUTPUT LOW GPIO(91)
 define HAL_BUZZER_PIN 91
+PB5 LED_BLUE OUTPUT LOW GPIO(1)
+define HAL_GPIO_A_LED_PIN 1
 PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
@@ -94,6 +98,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
