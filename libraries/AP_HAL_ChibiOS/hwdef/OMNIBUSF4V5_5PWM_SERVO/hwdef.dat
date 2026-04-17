@@ -1,5 +1,5 @@
 # hw definition для Omnibus F4 Pro (DShot 1-4 + Servo + Compass)
-# Исправлено: системный таймер на TIM7, Servo/VTX на TIM5
+# РЕШЕНИЕ: Servo/VTX на TIM9, система на TIM5 (стандарт)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -8,9 +8,8 @@ OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- ГЛАВНЫЙ ТРЮК ---
-# Освобождаем TIM5 для серво и VTX, перенося систему на вспомогательный TIM7
-STM32_ST_USE_TIMER 7
+# Системный таймер оставляем стандартным для стабильности
+STM32_ST_USE_TIMER 5
 
 # Шины (I2C2 на PB10/11 для компаса)
 I2C_ORDER I2C2
@@ -21,18 +20,17 @@ PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 
 # --- МОТОРЫ 1-4 (DShot на TIM1 и TIM2) ---
-# Стандартная колодка ESC J10
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО И VTX (Теперь на свободном таймере TIM5) ---
-# PA1 (M5) и PA0 (RSSI) теперь не конфликтуют с моторами
-PA1 TIM5_CH2  TIM5 PWM(5) GPIO(54) NODMA
+# --- СЕРВО И VTX (На отдельном таймере TIM9) ---
+# Изолируем их от моторов и системы. TIM9 есть на этих пинах у F405
+PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
 PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55) NODMA
 
-# --- ПОРТЫ И ШИНЫ (КОМПАС) ---
+# --- ПОРТЫ И ШИНЫ ---
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -52,7 +50,7 @@ PC10 SPI3_SCK SPI3
 PC11 SPI3_MISO SPI3
 PC12 SPI3_MOSI SPI3
 
-# UARTs (USART1 и USART6 для GPS/Телеметрии)
+# UARTs
 PA10 USART1_RX USART1
 PA9  USART1_TX USART1
 PC6  USART6_TX USART6
@@ -97,6 +95,7 @@ define HAL_BATT_CURR_SCALE 18.2
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
