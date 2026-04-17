@@ -1,5 +1,5 @@
-# hw definition Omnibus F4 Pro (Matek Style)
-# Решение: Серво на TIM9, моторы на TIM1/2, система на TIM5
+# hw definition Omnibus F4 Pro
+# Возврат к рабочей схеме: Серво на TIM5, Система на TIM3
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -8,10 +8,10 @@ OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# Система на стандартном таймере для стабильности
-STM32_ST_USE_TIMER 5
+# --- РАБОЧЕЕ РАЗДЕЛЕНИЕ ТАЙМЕРОВ ---
+# Переносим систему на TIM3, чтобы освободить TIM5 под серво (PA1)
+STM32_ST_USE_TIMER 3
 
-# Шины
 I2C_ORDER I2C2
 SERIAL_ORDER OTG1 USART1 USART6
 
@@ -23,24 +23,24 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
-# --- МОТОРЫ 1-4 (ТВОЯ СТАНДАРТНАЯ КОЛОДКА) ---
+# --- МОТОРЫ 1-4 (ТВОЯ КОЛОДКА J10) ---
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО НА PA1 (Используем TIM9, чтобы не мешать системе и моторам) ---
-# Это физическая функция пина PA1 на F405
-PA1 TIM9_CH2  TIM9 PWM(5) GPIO(54) NODMA
+# --- СЕРВО НА PA1 (M5) ---
+# На TIM5_CH2 (как и было в рабочей версии)
+PA1 TIM5_CH2  TIM5 PWM(5) GPIO(54)
 
-# --- VTX НА PA0 (GPIO) ---
-PA0 VTX_CTL OUTPUT LOW GPIO(55)
+# --- VTX НА PA0 (RSSI) ---
+PA0 TIM5_CH1  TIM5 PWM(6) GPIO(55)
 
 # --- КОМПАС (PB10/PB11) ---
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 
-# Периферия SPI
+# SPI Периферия
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -64,6 +64,7 @@ PC7  USART6_RX USART6
 # Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
+# Beeper как GPIO, чтобы не мешать TIM3
 PB4 PB4 OUTPUT LOW GPIO(91)
 define HAL_BUZZER_PIN 91
 PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
@@ -93,6 +94,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
