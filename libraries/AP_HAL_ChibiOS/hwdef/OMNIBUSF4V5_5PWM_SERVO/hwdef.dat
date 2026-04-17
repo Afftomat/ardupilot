@@ -1,5 +1,5 @@
-# hw definition для твоей кастомной распиновки Omnibus F4 Pro
-# РАБОЧАЯ СХЕМА: Серво на PA1 + Компас (I2C2)
+# hw definition для твоего Omnibus F4 Pro
+# РАСПРЕДЕЛЕНИЕ: Моторы на TIM1/TIM8, Серво отдельно на TIM2
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,34 +9,31 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- КОМПАС (Шина I2C2 на PB10/PB11) ---
-# Убираем всё, что мешает этим пинам (USART3 удален из списка ниже)
+# Шины и порты (USART3 убран для работы компаса на PB10/11)
 I2C_ORDER I2C2
+SERIAL_ORDER OTG1 USART1 USART6
+
+# --- МОТОРЫ 1-4 (Группа DShot) ---
+# Моторы 1 и 2 на TIM1
+PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
+PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
+# Моторы 3 и 4 переносим на TIM8 (это пины PC8, PC9 по схеме)
+# Чтобы они были в "кучке" с DShot и не мешали TIM2
+PC8 TIM8_CH3  TIM8 PWM(3) GPIO(52)
+PC9 TIM8_CH4  TIM8 PWM(4) GPIO(53)
+
+# --- СЕРВО НА PA1 (Теперь она ОДНА на TIM2) ---
+# Теперь DShot моторов её не трогает
+PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54)
+
+# --- VTX НА PA0 (GPIO) ---
+PA0 VTX_CTL OUTPUT LOW GPIO(55)
+
+# --- КОМПАС (PB10/PB11) ---
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 
-# SERIAL_ORDER (Оставляем 1 и 6 для GPS и Телеметрии)
-SERIAL_ORDER OTG1 USART1 USART6
-
-# --- МОТОРЫ 1-4 (Стандартные пины) ---
-PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
-PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
-PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
-
-# --- ТВОЯ РАБОЧАЯ СЕРВА НА PA1 (M5) ---
-# Возвращаем NODMA — это единственный способ заставить ее работать рядом с DShot
-PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
-
-# VTX на PA0 (RSSI) — делаем GPIO, чтобы не было ошибки TIM5
-PA0 VTX_CTL OUTPUT LOW GPIO(55)
-
-# Прочие PWM
-PA8 TIM1_CH1  TIM1 PWM(6) GPIO(56)
-PC8 TIM8_CH3  TIM8 PWM(7) GPIO(57)
-PC9 TIM8_CH4  TIM8 PWM(8) GPIO(58)
-
-# --- ПЕРИФЕРИЯ SPI ---
+# --- SPI И ПЕРИФЕРИЯ ---
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -72,7 +69,6 @@ SPIDEV sdcard     SPI2 DEVID2 SDCARD_CS  MODE0 400*KHZ 25*MHZ
 SPIDEV bmp280     SPI3 DEVID3 BMP280_CS  MODE3 1*MHZ 8*MHZ
 SPIDEV osd        SPI3 DEVID4 OSD_CS     MODE0 10*MHZ 10*MHZ
 
-# IMU, Baro, Compass
 IMU Invensense SPI:mpu6000 ROTATION_YAW_180
 BARO BMP280 SPI:bmp280
 define AP_BARO_BMP280_ENABLED 1
@@ -85,8 +81,6 @@ PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 define HAL_BATT_VOLT_PIN 12
 define HAL_BATT_CURR_PIN 11
-define HAL_BATT_VOLT_SCALE 11
-define HAL_BATT_CURR_SCALE 18.2
 
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
@@ -98,6 +92,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
