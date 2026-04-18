@@ -1,5 +1,5 @@
-# hw definition для Omnibus F4 Pro (РАБОЧАЯ СЕРВА НА PA1)
-# Конфиг: 4 мотора (DShot) + Серво на M5 (PA1) + Компас (I2C2)
+# hw definition Omnibus F4 Pro (VYRIY STYLE)
+# 4 мотора (DShot) + Серво на PA1 (M5) + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -15,7 +15,7 @@ PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
-# Порты
+# Порты (USART1 и USART6 для GPS)
 SERIAL_ORDER OTG1 USART1 USART6
 
 # ADC (Питание)
@@ -26,20 +26,15 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
-# --- МОТОРЫ 1-4 (Группа DShot) ---
-# Назначаем моторы 1-4. Моторы 3 и 4 делят TIM2 с сервой.
+# --- МОТОРЫ 1-4 (ТВОЯ КОЛОДКА J10) ---
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО НА ПИНЕ PA1 (M5) ---
-# Использование NODMA принудительно отделяет серву от DMA-потоков DShot
+# --- ТВОЯ РАБОЧАЯ СЕРВА НА PA1 (PWM5) ---
+# Оставляем NODMA — это ключ к работе на одном таймере с моторами
 PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
-
-# Пин PA8 и PA0 свободны
-PA8 PA8 INPUT
-PA0 PA0 INPUT
 
 # --- SPI И ПЕРИФЕРИЯ ---
 PA4 MPU6000_CS CS
