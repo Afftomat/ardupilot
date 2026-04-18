@@ -1,5 +1,5 @@
-# hw definition для твоего Omnibus F4 Pro
-# Конфиг: 4 мотора (DShot) + Серво на PA8 (M6/S6) + Компас (I2C2)
+# hw definition Omnibus F4 Pro (MATEK/CHUPACABRA STYLE)
+# РЕШЕНИЕ: Моторы на TIM1/TIM2, Серво отдельно на TIM3 (PB0)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,13 +9,12 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- КОМПАС (PB10/11) ---
+# --- ПОРТЫ И ШИНЫ (КОМПАС) ---
 I2C_ORDER I2C2
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
-# Порты (USART3 убран для работы компаса)
 SERIAL_ORDER OTG1 USART1 USART6
 
 # ADC (Питание)
@@ -26,22 +25,19 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
-# --- МОТОРЫ 1-4 (ТВОЯ КОЛОДКА J10) ---
-PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
-PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
-PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
+# --- МОТОРЫ 1-4 (ГРУППА DSHOT - TIM1 и TIM2) ---
+# Переназначили пины, чтобы освободить PB0 под серву
+PA8 TIM1_CH1  TIM1 PWM(1) GPIO(50)  # M1 теперь тут (площадка LED)
+PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)  # M2
+PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)  # M3
+PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)  # M4
 
-# --- СЕРВО НА ПИНЕ PA8 (Площадка S6 или LED) ---
-# Назначаем как 5-й канал (SERVO5)
-PA8 TIM1_CH1  TIM1 PWM(5) GPIO(54)
+# --- СЕРВО НА PB0 (Площадка M1) ---
+# Теперь серва на TIM3. Это ПОЛНОСТЬЮ другая кучка.
+# DShot на TIM1/2 ей никак не помешает.
+PB0 TIM3_CH3  TIM3 PWM(5) GPIO(54) 
 
-# PA1 (M5) и PB4 (Buzz) освобождаем
-PA1 PA1 INPUT
-PB4 PB4 INPUT
-PA0 PA0 INPUT
-
-# SPI Периферия
+# --- ПЕРИФЕРИЯ SPI ---
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -65,6 +61,8 @@ PC7  USART6_RX USART6
 # Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
+PB4 PB4 OUTPUT LOW GPIO(91)
+define HAL_BUZZER_PIN 91
 PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
@@ -80,6 +78,7 @@ BARO BMP280 SPI:bmp280
 define AP_BARO_BMP280_ENABLED 1
 define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
+define HAL_I2C_INTERNAL_MASK 0
 
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
@@ -91,6 +90,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
