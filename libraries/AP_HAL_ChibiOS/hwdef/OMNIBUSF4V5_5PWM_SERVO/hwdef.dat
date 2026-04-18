@@ -1,5 +1,5 @@
-# hw definition Omnibus F4 Pro (MATEK/CHUPACABRA STYLE)
-# Моторы 1-4 (DShot) отдельно, Серво (PA1) на TIM5 отдельно
+# hw definition Omnibus F4 Pro (РАБОЧАЯ СХЕМА С РАЗДЕЛЕНИЕМ)
+# Конфиг: 4 мотора + Серво на PA1 + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -8,15 +8,14 @@ OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- ГЛАВНЫЙ СЕКРЕТ РАЗДЕЛЕНИЯ ---
-# Переносим систему на TIM11. Это освобождает TIM5 полностью.
-# Теперь PA1 (серва) и моторы (TIM1/2) в РАЗНЫХ кучках.
-STM32_ST_USE_TIMER 11
+# --- РАСПРЕДЕЛЕНИЕ ТАЙМЕРОВ ---
+# Система на TIM2 (32-бит)
+STM32_ST_USE_TIMER 2
 
 I2C_ORDER I2C2
 SERIAL_ORDER OTG1 USART1 USART6
 
-# ADC (Питание без ошибок)
+# ADC (Питание)
 PC1 BAT_CURR_SENS ADC1 SCALE(1)
 PC2 BAT_VOLT_SENS ADC1 SCALE(1)
 define HAL_BATT_VOLT_PIN 12
@@ -24,14 +23,16 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
-# --- МОТОРЫ 1-4 (ТВОЯ КОЛОДКА J10 - TIM1 и TIM2) ---
+# --- МОТОРЫ 1-4 (ГРУППА DSHOT) ---
+# Моторы 1 и 2 на TIM1
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
-PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
+# Моторы 3 и 4 переносим на TIM5 (PA2, PA3), чтобы не мешать системе на TIM2
+PA2 TIM5_CH3  TIM5 PWM(3) GPIO(52)
+PA3 TIM5_CH4  TIM5 PWM(4) GPIO(53)
 
-# --- СЕРВО НА PA1 (ТЕПЕРЬ НА TIM5) ---
-# Пин PA1 поддерживает TIM5_CH2. Теперь это отдельная кучка от моторов.
+# --- СЕРВО НА PA1 (M5) ---
+# Теперь она на TIM5_CH2. Это отдельная группа от моторов 1-2 и системы.
 PA1 TIM5_CH2  TIM5 PWM(5) GPIO(54)
 
 # --- КОМПАС (PB10/PB11) ---
@@ -63,8 +64,8 @@ PC7  USART6_RX USART6
 # Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
-PB4 PB4 OUTPUT LOW GPIO(91)
-define HAL_BUZZER_PIN 91
+# Пищалка на PB4 (TIM3)
+PB4 TIM3_CH1 TIM3 GPIO(91) ALARM LOW
 PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
@@ -92,6 +93,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
