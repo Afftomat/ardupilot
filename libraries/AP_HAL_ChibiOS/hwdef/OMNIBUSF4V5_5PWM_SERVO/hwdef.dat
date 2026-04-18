@@ -1,5 +1,5 @@
-# hw definition для Omnibus F4 Pro
-# Конфиг: 4 мотора (DShot) + Серво на площадке BUZ- (PB4) + Компас (I2C2)
+# hw definition для твоего Omnibus F4 Pro
+# Конфиг: 4 мотора (DShot) + Серво на PA8 (M6/S6) + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,13 +9,13 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- КОМПАС (PB10/PB11) ---
+# --- КОМПАС (PB10/11) ---
 I2C_ORDER I2C2
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
-# Порты
+# Порты (USART3 убран для работы компаса)
 SERIAL_ORDER OTG1 USART1 USART6
 
 # ADC (Питание)
@@ -32,26 +32,24 @@ PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО НА ПЛОЩАДКЕ BUZ- (PB4) ---
-# Пин PB4 использует TIM3. Это ПОЛНОСТЬЮ отдельная группа от моторов.
-PB4 TIM3_CH1  TIM3 PWM(5) GPIO(54) 
+# --- СЕРВО НА ПИНЕ PA8 (Площадка S6 или LED) ---
+# Назначаем как 5-й канал (SERVO5)
+PA8 TIM1_CH1  TIM1 PWM(5) GPIO(54)
 
-# Свободные пины
+# PA1 (M5) и PB4 (Buzz) освобождаем
 PA1 PA1 INPUT
+PB4 PB4 INPUT
 PA0 PA0 INPUT
-PA8 PA8 INPUT
 
-# --- ПЕРИФЕРИЯ SPI ---
+# SPI Периферия
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
 PA7 SPI1_MOSI SPI1
-
 PB12 SDCARD_CS CS
 PB13 SPI2_SCK SPI2
 PB14 SPI2_MISO SPI2
 PB15 SPI2_MOSI SPI2
-
 PA15 OSD_CS CS
 PB3  BMP280_CS CS
 PC10 SPI3_SCK SPI3
@@ -82,7 +80,6 @@ BARO BMP280 SPI:bmp280
 define AP_BARO_BMP280_ENABLED 1
 define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
-define HAL_I2C_INTERNAL_MASK 0
 
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
