@@ -1,5 +1,5 @@
-# hw definition Omnibus F4 Pro (Matek/Vyriy Style)
-# МОТОРЫ (TIM1/2) отдельно, СЕРВА (TIM5) отдельно, СИСТЕМА на TIM2
+# hw definition Omnibus F4 Pro
+# РЕШЕНИЕ: Система на TIM5, Моторы на TIM1/2, Серво на TIM3 (PB4)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -8,18 +8,15 @@ OSCILLATOR_HZ 8000000
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- ГЛАВНЫЙ СЕКРЕТ РАЗДЕЛЕНИЯ ---
-# Переносим систему на TIM2. Это освобождает TIM5 полностью для сервы.
-# При этом моторы 3-4 на TIM2 смогут работать вместе с системой.
-STM32_ST_USE_TIMER 2
+# Система на стандартном TIM5 (32-бит)
+STM32_ST_USE_TIMER 5
 
-# Шины (Компас на PB10/11)
+# Шины и порты (Компас на PB10/11)
 I2C_ORDER I2C2
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
-# Порты
 SERIAL_ORDER OTG1 USART1 USART6
 
 # ADC (Питание)
@@ -31,21 +28,23 @@ define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
 # --- МОТОРЫ 1-4 (ТВОЯ КОЛОДКА J10) ---
-# Моторы 1-2 на TIM1
+# Группа 1 (TIM1)
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-# Моторы 3-4 на TIM2
+# Группа 2 (TIM2)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО НА PA1 (ТЕПЕРЬ НА TIM5 — ПОЛНАЯ ИЗОЛЯЦИЯ) ---
-# Теперь TIM5 не занят ни моторами, ни системой. Серва будет работать четко.
-PA1 TIM5_CH2  TIM5 PWM(5) GPIO(54)
+# --- СЕРВО НА PB4 (Площадка BUZZER) ---
+# Пин PB4 сидит на TIM3. Это ПОЛНОСТЬЮ другая кучка.
+# DShot на TIM1/2 ей никак не помешает.
+PB4 TIM3_CH1  TIM3 PWM(5) GPIO(54)
 
-# Пин PA0 (RSSI) оставляем свободным
+# PA1 (M5) и PA0 (RSSI) оставляем свободными, чтобы не было конфликтов
+PA1 PA1 INPUT
 PA0 PA0 INPUT
 
-# --- SPI И ПЕРИФЕРИЯ ---
+# SPI Периферия (Стандарт)
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -69,9 +68,6 @@ PC7  USART6_RX USART6
 # Индикация
 PB5 LED_BLUE OUTPUT LOW GPIO(1)
 define HAL_GPIO_A_LED_PIN 1
-# Beeper как GPIO, чтобы не занимать таймеры
-PB4 PB4 OUTPUT LOW GPIO(91)
-define HAL_BUZZER_PIN 91
 PB8 TIM4_CH3 TIM4 RCININT PULLDOWN LOW
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
@@ -89,7 +85,6 @@ define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 
-# Системное
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
 define HAL_OS_FATFS_IO 1
@@ -100,6 +95,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
