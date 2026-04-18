@@ -1,5 +1,5 @@
-# hw definition для твоей рабочей сборки Omnibus F4 Pro
-# Конфиг: 4 мотора + Серво на PA8 (PWM6) + Компас (I2C2)
+# hw definition для Omnibus F4 Pro (РАБОЧАЯ СЕРВА НА PA1)
+# Конфиг: 4 мотора (DShot) + Серво на M5 (PA1) + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
@@ -9,14 +9,13 @@ STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# --- ШИНЫ И ПОРТЫ (ОЖИВЛЕНИЕ КОМПАСА) ---
-# Четко указываем порядок, чтобы External определился сразу
+# --- КОМПАС (I2C2 на PB10/11) ---
 I2C_ORDER I2C2
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
-# Порядок портов (убираем USART3, чтобы не мешал шине I2C2)
+# Порты
 SERIAL_ORDER OTG1 USART1 USART6
 
 # ADC (Питание)
@@ -27,15 +26,20 @@ define HAL_BATT_CURR_PIN 11
 define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
-# --- PWM ВЫХОДЫ ---
-# Моторы 1-4 (Стандарт J10)
+# --- МОТОРЫ 1-4 (Группа DShot) ---
+# Назначаем моторы 1-4. Моторы 3 и 4 делят TIM2 с сервой.
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# Твоя Серва на PA8 (PWM6), чтобы не мешать моторам на TIM2
-PA8 TIM1_CH1  TIM1 PWM(6) GPIO(55)
+# --- СЕРВО НА ПИНЕ PA1 (M5) ---
+# Использование NODMA принудительно отделяет серву от DMA-потоков DShot
+PA1 TIM2_CH2  TIM2 PWM(5) GPIO(54) NODMA
+
+# Пин PA8 и PA0 свободны
+PA8 PA8 INPUT
+PA0 PA0 INPUT
 
 # --- SPI И ПЕРИФЕРИЯ ---
 PA4 MPU6000_CS CS
@@ -80,7 +84,6 @@ define ALLOW_ARM_NO_COMPASS
 define AP_COMPASS_PROBING_ENABLED 1
 define HAL_I2C_INTERNAL_MASK 0
 
-# Системные
 STORAGE_FLASH_PAGE 1
 define HAL_STORAGE_SIZE 15360
 define HAL_OS_FATFS_IO 1
@@ -91,6 +94,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
