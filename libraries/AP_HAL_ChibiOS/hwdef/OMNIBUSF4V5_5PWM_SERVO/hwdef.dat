@@ -1,22 +1,21 @@
-# hw definition Omnibus F4 Pro
-# РЕШЕНИЕ: Система на TIM5, Моторы на TIM1/2, Серво на TIM3 (PB4)
+# hw definition для Omnibus F4 Pro
+# Конфиг: 4 мотора (DShot) + Серво на площадке BUZ- (PB4) + Компас (I2C2)
 
 MCU STM32F4xx STM32F405xx
 APJ_BOARD_ID AP_HW_OMNIBUSF4PRO
 
 OSCILLATOR_HZ 8000000
+STM32_ST_USE_TIMER 5
 FLASH_SIZE_KB 1024
 FLASH_RESERVE_START_KB 64
 
-# Система на стандартном TIM5 (32-бит)
-STM32_ST_USE_TIMER 5
-
-# Шины и порты (Компас на PB10/11)
+# --- КОМПАС (PB10/PB11) ---
 I2C_ORDER I2C2
 PB10 I2C2_SCL I2C2 PULLUP
 PB11 I2C2_SDA I2C2 PULLUP
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
+# Порты
 SERIAL_ORDER OTG1 USART1 USART6
 
 # ADC (Питание)
@@ -28,31 +27,31 @@ define HAL_BATT_VOLT_SCALE 11.0
 define HAL_BATT_CURR_SCALE 18.2
 
 # --- МОТОРЫ 1-4 (ТВОЯ КОЛОДКА J10) ---
-# Группа 1 (TIM1)
 PB0 TIM1_CH2N TIM1 PWM(1) GPIO(50)
 PB1 TIM1_CH3N TIM1 PWM(2) GPIO(51)
-# Группа 2 (TIM2)
 PA3 TIM2_CH4  TIM2 PWM(3) GPIO(52)
 PA2 TIM2_CH3  TIM2 PWM(4) GPIO(53)
 
-# --- СЕРВО НА PB4 (Площадка BUZZER) ---
-# Пин PB4 сидит на TIM3. Это ПОЛНОСТЬЮ другая кучка.
-# DShot на TIM1/2 ей никак не помешает.
-PB4 TIM3_CH1  TIM3 PWM(5) GPIO(54)
+# --- СЕРВО НА ПЛОЩАДКЕ BUZ- (PB4) ---
+# Пин PB4 использует TIM3. Это ПОЛНОСТЬЮ отдельная группа от моторов.
+PB4 TIM3_CH1  TIM3 PWM(5) GPIO(54) 
 
-# PA1 (M5) и PA0 (RSSI) оставляем свободными, чтобы не было конфликтов
+# Свободные пины
 PA1 PA1 INPUT
 PA0 PA0 INPUT
+PA8 PA8 INPUT
 
-# SPI Периферия (Стандарт)
+# --- ПЕРИФЕРИЯ SPI ---
 PA4 MPU6000_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
 PA7 SPI1_MOSI SPI1
+
 PB12 SDCARD_CS CS
 PB13 SPI2_SCK SPI2
 PB14 SPI2_MISO SPI2
 PB15 SPI2_MOSI SPI2
+
 PA15 OSD_CS CS
 PB3  BMP280_CS CS
 PC10 SPI3_SCK SPI3
@@ -95,6 +94,7 @@ ROMFS_WILDCARD libraries/AP_OSD/fonts/font0.bin
 include ../include/minimize_fpv_osd.inc
 undef HAL_MOUNT_ENABLED
 define HAL_MOUNT_ENABLED 1
+
 
 
 
